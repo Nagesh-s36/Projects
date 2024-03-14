@@ -1,85 +1,115 @@
 import javax.swing.*;
+import java.io.*;
 import java.awt.event.*;
 import java.awt.*;
-import java.util.Scanner;
 
-class FrameClass extends JFrame{
-    JButton button, lazyButton;
-    JLabel label, doneLabel, notDoneLabel, totalLabel, taskLabel, finishLabel, notFinishLabel;
-    JPanel panel;
-    String getLabelInput;
+class TaskGUI extends JFrame {
     int done = 0, notDone = 0, total = 0;
-    Scanner scanner = new Scanner(System.in);
-    FrameClass(){
-        System.out.println("Enter the name of the task:");
-        getLabelInput = scanner.next();
-        label = new JLabel(getLabelInput);
+    JTextField taskField;
+    JLabel taskLabel, infoTaskLabel, doneLabel, notDoneLabel, totalLabel;
+    JButton doneButton, notDoneButton, saveButton;
+    JPanel gridPanel, taskPanel, buttonPanel;
+
+    TaskGUI() {
+        infoTaskLabel = new JLabel("Enter the Task:");
+        taskField = new JTextField(20);
+        taskLabel = new JLabel();
+        doneButton = new JButton("Done for the Day");
+        notDoneButton = new JButton("Not Done for the Day");
+        saveButton = new JButton("Save");
         doneLabel = new JLabel();
         notDoneLabel = new JLabel();
-        taskLabel = new JLabel("Task");
-        finishLabel = new JLabel("Finish");
-        notFinishLabel = new JLabel("Not Finish");
-        JLabel infoTotalLabel = new JLabel("Total Days");
         totalLabel = new JLabel();
-        button = new JButton("+");
-        lazyButton = new JButton("-");
-        panel = new JPanel();
-        JPanel infoPanel = new JPanel();
+        JLabel tLabel = new JLabel("Total Number of Days Done:");
+        doneLabel.setBackground(new Color(120, 140, 240));
+        notDoneLabel.setBackground(new Color(90, 80, 60));
+        totalLabel.setBackground(new Color(1, 10, 100));
 
-        infoPanel.add(taskLabel);
-        infoPanel.add(finishLabel);
-        infoPanel.add(notFinishLabel);
-        infoPanel.add(infoTotalLabel);
-
-        panel.add(label);
-        panel.add(button);
-        panel.add(doneLabel);
-        panel.add(lazyButton);
-        panel.add(notDoneLabel);
-        panel.add(totalLabel);
-
-        panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-        infoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-
-        // Add components to the content pane using BorderLayout
-        Container contentPane = getContentPane();
-        contentPane.setLayout(new BorderLayout());
-        contentPane.add(infoPanel, BorderLayout.NORTH);
-        contentPane.add(panel, BorderLayout.CENTER);
-
-        button.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                done++;
-                total=done+notDone;
-                String doneString= Integer.toString(done);
-                String notDoneString =Integer.toString(notDone);
-                String totalString=Integer.toString(total);
-                doneLabel.setText(doneString);
-                notDoneLabel.setText(notDoneString);
-                totalLabel.setText(totalString);
-            }
-        });
-        lazyButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                notDone++;
-                total=notDone+done;
-                String doneString= Integer.toString(done);
-                String notDoneString =Integer.toString(notDone);
-                String totalString=Integer.toString(total);
-                doneLabel.setText(doneString);
-                notDoneLabel.setText(notDoneString);
-                totalLabel.setText(totalString);
-            }
+        taskField.addActionListener(e -> {
+            taskLabel.setText(taskField.getText());
         });
 
+        doneButton.addActionListener(e -> {
+            done++;
+            total = done + notDone;
+            String doneS = String.valueOf(done);
+            String totalS = String.valueOf(total);
+            doneLabel.setText(doneS);
+            totalLabel.setText(totalS);
+        });
+
+        notDoneButton.addActionListener(e -> {
+            notDone++;
+            total = done + notDone;
+            String notDoneS = String.valueOf(notDone);
+            String totalS = String.valueOf(total);
+            notDoneLabel.setText(notDoneS);
+            totalLabel.setText(totalS);
+        });
+
+        saveButton.addActionListener(e -> {
+            saveStateToFile();
+        });
+
+        gridPanel = new JPanel();
+        gridPanel.setLayout(new GridLayout(0, 2));
+        gridPanel.add(infoTaskLabel);
+        gridPanel.add(taskField);
+        taskPanel = new JPanel();
+        taskPanel.add(taskLabel, new BorderLayout().NORTH);
+        buttonPanel = new JPanel();
+        buttonPanel.add(doneButton);
+        buttonPanel.add(doneLabel);
+        buttonPanel.add(notDoneButton);
+        buttonPanel.add(notDoneLabel);
+        buttonPanel.add(tLabel);
+        buttonPanel.add(totalLabel);
+        buttonPanel.add(saveButton);
+        buttonPanel.setLayout(new GridLayout(0, 6));
+        taskPanel.setBackground(new Color(0, 38, 77));
+        buttonPanel.setBackground(new Color(255, 153, 51));
+        gridPanel.setBackground(new Color(255, 69, 0));
+
+        
+        loadStateFromFile();
+
+        this.add(gridPanel);
+        this.add(taskPanel);
+        this.add(buttonPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(600,650);
+        this.setSize(400, 400);
+        this.getContentPane().setBackground(new Color(255, 105, 180));
+        this.setLayout(new FlowLayout());
         this.setVisible(true);
     }
-}
 
-public class TaskGUI{
-    public static void main(String args[]){
-        new FrameClass();
+   
+    private void saveStateToFile() {
+        try (PrintWriter writer = new PrintWriter("task_state.txt")) {
+            writer.println(taskField.getText());
+            writer.println(done);
+            writer.println(notDone);
+            writer.println(total);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadStateFromFile() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("task_state.txt"))) {
+            taskLabel.setText(reader.readLine());
+            done = Integer.parseInt(reader.readLine());
+            notDone = Integer.parseInt(reader.readLine());
+            total = Integer.parseInt(reader.readLine());
+            doneLabel.setText(String.valueOf(done));
+            notDoneLabel.setText(String.valueOf(notDone));
+            totalLabel.setText(String.valueOf(total));
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String args[]) {
+        new TaskGUI();
     }
 }
