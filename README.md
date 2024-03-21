@@ -9,6 +9,9 @@ Upcoming project:
 	Also looking for the collab or contributions to this repository is also welcome
 If you have any queries or any suggestion to criticise feel good to E-Mail at darklordryuk@gmail.com :)
 
+In the second commit I have added an save button to track the current saved options of the user
+In the future with some FriendXD Will try to make it an finish Product<3
+
 Dhanywadgalu:)
 
 I hope that in this I will be able to maintain consistency
